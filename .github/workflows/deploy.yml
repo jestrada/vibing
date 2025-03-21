@@ -15,21 +15,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Setup Node.js
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-      - name: Install dependencies
+
+      # Copy root index
+      - name: Copy root index
+        run: |
+          mkdir -p dist
+          cp index.html dist/
+
+      # Build egg-prices
+      - name: Build egg-prices
         run: |
           cd egg-prices
           npm ci
-      - name: Build
-        run: |
-          cd egg-prices
           npm run build
+          mkdir -p ../dist/egg-prices
+          cp -r dist/* ../dist/egg-prices/
+
+      # Upload artifact
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: egg-prices/dist
+          path: dist
 
   deploy:
     needs: build
