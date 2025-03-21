@@ -5,35 +5,45 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+  pages: write
+  id-token: write
+
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-
-      # Setup Node.js
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-
-      # Copy root index
-      - name: Copy root index
-        run: |
-          mkdir -p dist
-          cp index.html dist/
-
-      # Build egg-prices
-      - name: Build egg-prices
+      - name: Install dependencies
         run: |
           cd egg-prices
           npm ci
+      - name: Build
+        run: |
+          cd egg-prices
           npm run build
-          mkdir -p ../dist/egg-prices
-          cp -r dist/* ../dist/egg-prices/
-
-      # Deploy to gh-pages branch
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Copy root index
+        run: |
+          mkdir -p dist
+          cp index.html dist/egg-prices/
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          path: egg-prices/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
