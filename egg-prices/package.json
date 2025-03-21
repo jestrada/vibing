@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://jestrada.github.io/egg-prices",
+  "homepage": "https://jestrada.github.io/vibing/egg-prices",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
